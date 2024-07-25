@@ -13,23 +13,72 @@
   </head>
   <body>
     <div class="container mt-5 text-center">
-      <h1>To-Do List</h1>
       <div class="row justify-content-center">
-        <div class="col-md-5">
+        <div class="col-md-8">
           <div class="card">
+            <div class="card-header h1">To-Do List</div>
             <div class="card-body">
               <div class="input-group">
                 <input
                   type="text"
+                  id="txtInput"
                   class="form-control"
                   placeholder="Add new task"
                 />
-                <button class="btn btn-success" type="button">Add</button>
+                <button class="btn btn-success" id="btnAdd" type="button">
+                  Add
+                </button>
               </div>
             </div>
+            <div class="card-header">
+              <button
+                class="btn btn-sm btn-danger float-end"
+                id="btnRemove"
+                type="button"
+              >
+                Remove
+              </button>
+            </div>
+            <ul
+              id="task-list"
+              class="list-group list-group-flush text-start"
+            ></ul>
           </div>
         </div>
       </div>
     </div>
+    <script>
+      "use strict"; //hata aldığında bunu kontrol et snytax olabilir
+
+      let getir = document.getElementById("task-list");
+      let gorevListesi = [
+        { id: 1, gorev: "Görev 1" },
+        { id: 2, gorev: "Görev 2" },
+        { id: 3, gorev: "Görev 3" },
+        { id: 4, gorev: "Görev 4" },
+      ];
+
+      for (let i of gorevListesi) {
+        let li = `
+        <li class="task list-group-item">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-item" id="${i.id}" />
+            <label for="${i.id}" class="form-check-label">${i.gorev}
+            </label>
+          </div>
+        </li>`;
+        getir.insertAdjacentHTML("afterbegin", li);
+      }
+      function newTask(event) {
+        console.log("ekledim");
+      }
+      function removeTask(event) {
+        console.log("ekledim");
+      }
+
+      document.querySelector("#btnAdd").addEventListener("click", newTask);
+      document.querySelector("#btnRemove").addEventListener("click", removeTask);
+
+    </script>
   </body>
 </html>
