@@ -10,6 +10,12 @@
       integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH"
       crossorigin="anonymous"
     />
+    <style>
+
+    .task label.checked{
+    text-decoration: line-through;}
+
+    </style>
   </head>
   <body>
     <div class="container mt-5 text-center">
@@ -18,35 +24,31 @@
           <div class="card">
             <div class="card-header h1">To-Do List</div>
             <div class="card-body">
-              <div class="input-group">
+              <div class="input-group mb-3">
                 <input
                   type="text"
                   id="txtInput"
                   class="form-control"
                   placeholder="Yeni Görev Ekle"
                 />
-                <button class="btn btn-success" id="btnAdd" type="button">
-                  Add
+                <button class="btn btn-outline-primary" id="btnAdd" type="button">
+                  Ekle
                 </button>
               </div>
             </div>
             <div class="card-header">
               <button
-                class="btn btn-sm btn-danger float-end"
-                id="btnRemove"
-                type="button"
-              >
-                Remove
+                class="btn btn-sm btn-outline-secondary float-end"id="btnClear" type="button">
+                Temizle
               </button>
             </div>
             <ul
-              id="task-list"
-              class="list-group list-group-flush text-start"
-            ></ul>
+              id="task-list" class="list-group list-group-flush"></ul>
           </div>
         </div>
       </div>
     </div>
+    
     <script
       src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"
       integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz"
@@ -54,65 +56,81 @@
     ></script>
     <script>
       "use strict"; //hata aldığında bunu kontrol et snytax olabilir
+      let editId;
+      let isEditTask=false;
+      const yazdir = document.querySelector("#txtInput");
+      const btnClear= document.querySelector("#btnClear")
 
       let gorevListesi = [
-        { "id": 1, "gorev": "Görev 1" },
-        { "id": 2, "gorev": "Görev 2" },
-        { "id": 3, "gorev": "Görev 3" },
-        { "id": 4, "gorev": "Görev 4" },
+        { "id": 1, "gorev": "Görev 1","durum":"completed"},
+        { "id": 2, "gorev": "Görev 2","durum":"pending"},
+        { "id": 3, "gorev": "Görev 3","durum":"completed"},
+        { "id": 4, "gorev": "Görev 4","durum":"completed"},
       ];
 
       displayTasks();
 
       function displayTasks() {
         let getir = document.getElementById("task-list");
-
         getir.innerHTML = "";
-        
-        for (let i of gorevListesi) {
+        if(gorevListesi.length==0){
+          getir.innerHTML="<p class=p-4>Görev listeniz boş.</p>"
+        }
+        else{
+          for (let i of gorevListesi) {
+            let completed=i.durum =="completed" ? "checked":"";
           let li = `
-        <li class="task list-group-item">
-          <div class="form-check">
-            <input type="checkbox" class="form-check-item" id="${i.id}" />
-            <label for="${i.id}" class="form-check-label">${i.gorev}
+        <li class="task list-group-item d-flex align-item-center">
+          <div class="form-check w-100 d-flex align-items-center">
+            <input type="checkbox" onclick="sec(this)" class="form-check-input " id="${i.id}" ${completed}>
+            <label for="${i.id}" class="form-check-label ${completed}">${i.gorev}
             </label>            
           </div>
           <div >
-          <button onclick="deleteTask(${i.id})" class="btn btn-danger float-end m-1" id="btnDelete" type="button">Sil</button>
+          <button onclick="deleteTask(${i.id})" class="btn btn-outline-danger float-end m-1" id="btnDelete" type="button">Sil</button>
           </div>
           <div class="px-2">
-          <button onclick="updateTask(${i.id})" class="btn btn-warning float-end m-1" id="btnEdit" type="button">Düzenle</button>
+          <button onclick='editTask(${i.id},"${i.gorev}")'class="btn btn-outline-warning float-end m-1" id="btnEdit" type="button">Düzenle</button>
           </div>
 
         </li>`;
 
           getir.insertAdjacentHTML("afterbegin", li);
         }
+        }
+       
       }
 
       function newTask(event) {
-        let yazdir = document.querySelector("#txtInput");
         if (yazdir.value == "") {
           alert("Lütfen bir değer giriniz.");
         } else {
-          gorevListesi.push({
-            id: gorevListesi.length + 1,
-            gorev: yazdir.value,
-          });
+          if (!isEditTask) {
+            gorevListesi.push({"id": gorevListesi.length + 1,"gorev": yazdir.value,});
           txtInput.value = "";
           displayTasks();
+          } else {
+            for(let i of gorevListesi){
+              if(i.id==editId){
+                i.gorev=txtInput.value;
+              }
+            }
+            isEditTask=false;
+            txtInput.value = "";
+            displayTasks();
+          }
         }
       }
 
       document.querySelector("#btnAdd").addEventListener("click", newTask);
-      document
-        .querySelector("#txtInput")
-        .addEventListener("keypress", function () {
+      
+      document.querySelector("#txtInput").addEventListener("keypress", function (event) {
           if (event.key == "Enter") {
             document.getElementById("btnAdd").click();
           }
         });
         function deleteTask(id){
+          if(confirm("Gerçekten silmek istiyor musunuz?")){
          let deletedID;
           for(let index in gorevListesi){
             if (gorevListesi[index].id==id) {
@@ -120,12 +138,38 @@
             }
           }
           gorevListesi.splice(deletedID,1);
+        }
           displayTasks();
         }
-        document.querySelector("#task-list").addEventListener(click,function(event){
-          
+        function editTask(taskId,taskName){
+          editId=taskId;
+          isEditTask=true;
+          txtInput.value=taskName;
+          txtInput.focus();
+          txtInput.classList.add("active");
+        }
+        btnClear.addEventListener("click",function(event){
+          if(confirm("Gerçekten temizlemek istiyor musunuz?")){
+          gorevListesi.splice(0,gorevListesi.length)}
+          displayTasks();
         })
-      
+        function sec(secilenTask) {
+            let label = secilenTask.nextElementSibling;
+            let durum;
+            if (secilenTask.checked) {
+                label.classList.add("checked");
+                durum = "completed";
+            } else {
+                label.classList.remove("checked");
+                durum = "pending";
+            }
+
+            for (let gorev of gorevListesi) {
+                if (gorev.id == secilenTask.id) {
+                    gorev.durum = durum;
+                }
+            }
+        }
     </script>
   </body>
 </html>
